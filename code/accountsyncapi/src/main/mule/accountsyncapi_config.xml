@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:spring="http://www.mulesoft.org/schema/mule/spring"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/spring http://www.mulesoft.org/schema/mule/spring/current/mule-spring.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<configuration-properties doc:name="Configuration properties" doc:id="18859f62-a900-4764-b43f-5d7626a0543d" file="properties\accountsyncapi_${mule.env}.properties" />
+	<global-property doc:name="Global Property" doc:id="81e7e223-305c-47fc-9b3b-00e4122492bc" name="mule.env" value="dev" />
+	<spring:config name="Spring_Config" doc:name="Spring Config" doc:id="4f2df7ab-1874-425c-932d-5f0219a266b2" files="springbeans.xml" />
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="25805b16-04ed-40bb-a758-2d79f9d2d6d5" >
+		<db:generic-connection url="jdbc:derby:memory:accountsdb" driverClassName="org.apache.derby.jdbc.EmbeddedDriver"/>
+	</db:config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="8308d876-5804-4e75-8428-760c47bfe880" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="1a468bdf-b3c9-487b-82b7-24071b693d24" file="properties\accountsyncapi_${mule.env}_secure.properties" key="${encryptKey}" />
+	<global-property doc:name="Global Property" doc:id="d7870b5c-d2cb-4be8-b893-1f5cd453335d" name="encryptKey" value="!A%D*G-KaPdSgVkY" />
+</mule>

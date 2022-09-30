@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="3a0bbd2a-6879-4bf2-8136-3198861b4e6c" >
+		<salesforce:basic-connection username="${salesforce.username}" password="Tanvi@48703" securityToken="${secure::salesforce.securitytoken}" />
+	</salesforce:sfdc-config>
+	<flow name="accountsyncapi_batchFlow" doc:id="3dd04b16-7010-441a-ba48-69cf10a9ff01" >
+		<scheduler doc:name="Scheduler" doc:id="7fbeba4f-c946-407e-a246-112ef68ebe79" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="10000"/>
+			</scheduling-strategy>
+		</scheduler>
+		<logger level="INFO" doc:name="Logger" doc:id="7da50d3c-ad41-4a40-a24e-045b472ec8ad" message="batch processing"/>
+		<db:select doc:name="Select" doc:id="ee51cc3b-7832-4ca6-a546-0ed3288925c3" config-ref="Database_Config">
+			<db:sql ><![CDATA[${database.select.account}]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="DB data to JSON" doc:id="dc37712d-cc76-4a8f-a4b5-99d5ddc37ee1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="8251b8f9-3d4c-476e-9d1a-f25f0bee320f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (item, index) -> {
+	Name: item.FIRSTNAME,
+	BillingStreet: item.ADDRESSLINE1,
+	BillingCity: item.CITY,
+	BillingState: item.STATE,
+	BillingPostalCode: item.POSTALCODE,
+	BillingCountry: item.COUNTRY
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create doc:name="Create" doc:id="4326b6fc-e932-454c-9090-41ceed2e36fa" config-ref="Salesforce_Config" type="Account"/>
+		<logger level="INFO" doc:name="Logger" doc:id="3fb1775e-a07d-4214-a204-ff1ffab1d59a" message="Salesforce insert output : #[payload]"/>
+	</flow>
+</mule>
